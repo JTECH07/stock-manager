@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Category } from './categories/entities/category.entity';
 import { Product } from './products/entities/product.entity';
 import { StockMovement } from './stock-movements/entities/stock-movement.entity';
+import { User, UserRole } from './users/entities/user.entity';
+import { UsersService } from './users/users.service';
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
@@ -14,6 +16,9 @@ export class AppService implements OnApplicationBootstrap {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(StockMovement)
     private readonly movementRepository: Repository<StockMovement>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   getHello(): string {
@@ -21,6 +26,36 @@ export class AppService implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
+    // 1. Initialisation des utilisateurs de test
+    const usersCount = await this.userRepository.count();
+    if (usersCount === 0) {
+      console.log('Seeding initial users (admin, manager, user)...');
+
+      await this.usersService.create({
+        email: 'admin@stockmanager.com',
+        name: 'Administrateur Principal',
+        password: 'admin123',
+        role: UserRole.ADMIN,
+      });
+
+      await this.usersService.create({
+        email: 'manager@stockmanager.com',
+        name: 'Responsable des Stocks',
+        password: 'manager123',
+        role: UserRole.MANAGER,
+      });
+
+      await this.usersService.create({
+        email: 'user@stockmanager.com',
+        name: 'Opérateur Magasin',
+        password: 'user123',
+        role: UserRole.USER,
+      });
+
+      console.log('Users seeded: admin, manager, user created!');
+    }
+
+    // 2. Initialisation des catégories et produits
     const categoriesCount = await this.categoryRepository.count();
     if (categoriesCount === 0) {
       console.log('Seeding initial categories and products into SQLite...');
@@ -88,7 +123,7 @@ export class AppService implements OnApplicationBootstrap {
         { productId: p3.id, type: 'OUT', quantity: 2 },
       ]);
 
-      console.log('Seeding completed successfully!');
+      console.log('Categories, products and movements seeded!');
     }
   }
 }
