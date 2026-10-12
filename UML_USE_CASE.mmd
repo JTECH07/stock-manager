@@ -1,0 +1,53 @@
+%% Use Case Diagram for Stock Management Application
+
+mermaid
+useCaseDiagram
+    title Use Case Diagram - Stock Management
+
+    actor User
+    actor Manager
+    actor Administrator
+
+    package "Stock Management System" {
+        useCase Lister_Produits
+        useCase Ajouter_Produit
+        useCase Modifier_Produit
+        useCase Supprimer_Produit
+        useCase Lister_Categories
+        useCase Ajouter_Categorie
+        useCase Modifier_Categorie
+        useCase Supprimer_Categorie
+        useCase Enregistrer_Entree
+        useCase Enregistrer_Sortie
+        useCase Voir_Alertes_Stock
+    }
+
+    User --> Lister_Produits
+    User --> Ajouter_Produit
+    User --> Modifier_Produit
+    User --> Supprimer_Produit
+    User --> Lister_Categories
+    User --> Ajouter_Categorie
+    User --> Modifier_Categorie
+    User --> Supprimer_Categorie
+    User --> Enregistrer_Entree
+    User --> Enregistrer_Sortie
+    User --> Voir_Alertes_Stock
+
+    Manager --> Lister_Produits
+    Manager --> Modifier_Produit
+    Manager --> Lister_Categories
+    Manager --> Modifier_Categorie
+    Manager --> Enregistrer_Entree
+    Manager --> Enregistrer_Sortie
+    Manager --> Voir_Alertes_Stock
+
+    Administrator --> Lister_Produits
+    Administrator --> Ajouter_Produit
+    Administrator --> Modifier_Produit
+    Administrator --> Supprimer_Produit
+    Administrator --> Lister_Categories
+    Administrator --> Ajouter_Categorie
+    Administrator --> Modifier_Categorie
+    Administrator --> Supprimer_Categorie
+    Administrator --> Voir_Alertes_Stock
