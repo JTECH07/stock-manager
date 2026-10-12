@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { api, CategoryPayload } from '../../api';
 import { Button } from '../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '../../components/Table';
+import { useAuth } from '../../context/AuthContext';
 
 export const CategoryListPage = () => {
+  const { canModify, canCreateOrDelete } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -126,9 +128,11 @@ export const CategoryListPage = () => {
           </p>
         </div>
 
-        <Button variant="accent" onClick={handleOpenCreateModal}>
-          Nouvelle Catégorie
-        </Button>
+        {canCreateOrDelete && (
+          <Button variant="accent" onClick={handleOpenCreateModal}>
+            Nouvelle Catégorie
+          </Button>
+        )}
       </div>
 
       {error && (
@@ -236,20 +240,27 @@ export const CategoryListPage = () => {
                 </TableCell>
                 <TableCell align="center">
                   <div style={{ display: 'inline-flex', gap: '8px' }}>
-                    <Button
-                      variant="outline"
-                      style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                      onClick={() => handleOpenEditModal(category)}
-                    >
-                      Modifier
-                    </Button>
-                    <Button
-                      variant="danger"
-                      style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                      onClick={() => handleDelete(category.id, category.name)}
-                    >
-                      Supprimer
-                    </Button>
+                    {canModify && (
+                      <Button
+                        variant="outline"
+                        style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+                        onClick={() => handleOpenEditModal(category)}
+                      >
+                        Modifier
+                      </Button>
+                    )}
+                    {canCreateOrDelete && (
+                      <Button
+                        variant="danger"
+                        style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+                        onClick={() => handleDelete(category.id, category.name)}
+                      >
+                        Supprimer
+                      </Button>
+                    )}
+                    {!canModify && !canCreateOrDelete && (
+                      <span style={{ color: '#94A3B8', fontSize: '0.8rem' }}>Lecture seule</span>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
