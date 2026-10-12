@@ -1,0 +1,94 @@
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './categories/entities/category.entity';
+import { Product } from './products/entities/product.entity';
+import { StockMovement } from './stock-movements/entities/stock-movement.entity';
+
+@Injectable()
+export class AppService implements OnApplicationBootstrap {
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(StockMovement)
+    private readonly movementRepository: Repository<StockMovement>,
+  ) {}
+
+  getHello(): string {
+    return 'Welcome to Stock Manager API!';
+  }
+
+  async onApplicationBootstrap() {
+    const categoriesCount = await this.categoryRepository.count();
+    if (categoriesCount === 0) {
+      console.log('Seeding initial categories and products into SQLite...');
+
+      const catInfo = await this.categoryRepository.save({
+        name: 'Informatique',
+        description: 'Matériel et accessoires informatiques',
+      });
+      const catBureau = await this.categoryRepository.save({
+        name: 'Bureautique',
+        description: 'Fournitures de bureau et papeterie',
+      });
+      const catMobilier = await this.categoryRepository.save({
+        name: 'Mobilier',
+        description: 'Chaises, bureaux et rangements',
+      });
+
+      const p1 = await this.productRepository.save({
+        name: 'Ordinateur Portable Pro 15',
+        description: 'Intel i7, 16Go RAM, SSD 512Go',
+        price: 980.0,
+        quantity: 12,
+        categoryId: catInfo.id,
+      });
+
+      const p2 = await this.productRepository.save({
+        name: 'Clavier Mécanique',
+        description: 'Switches rouges, rétro-éclairé',
+        price: 75.0,
+        quantity: 3, // Alerte stock bas
+        categoryId: catInfo.id,
+      });
+
+      const p3 = await this.productRepository.save({
+        name: 'Souris Sans Fil Ergonomique',
+        description: 'Capteur haute précision 4000 DPI',
+        price: 35.5,
+        quantity: 2, // Alerte stock bas
+        categoryId: catInfo.id,
+      });
+
+      const p4 = await this.productRepository.save({
+        name: 'Fauteuil Ergonomique Pro',
+        description: 'Support lombaire réglable',
+        price: 240.0,
+        quantity: 7,
+        categoryId: catMobilier.id,
+      });
+
+      const p5 = await this.productRepository.save({
+        name: 'Ramette Papier A4 80g (x5)',
+        description: 'Papier blanc extra pour imprimante',
+        price: 24.9,
+        quantity: 25,
+        categoryId: catBureau.id,
+      });
+
+      // Mouvements initiaux
+      await this.movementRepository.save([
+        { productId: p1.id, type: 'IN', quantity: 15 },
+        { productId: p1.id, type: 'OUT', quantity: 3 },
+        { productId: p2.id, type: 'IN', quantity: 5 },
+        { productId: p2.id, type: 'OUT', quantity: 2 },
+        { productId: p3.id, type: 'IN', quantity: 4 },
+        { productId: p3.id, type: 'OUT', quantity: 2 },
+      ]);
+
+      console.log('Seeding completed successfully!');
+    }
+  }
+}
