@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { api, ProductPayload } from '../../api';
 import { Button } from '../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '../../components/Table';
+import { useAuth } from '../../context/AuthContext';
 
 export const ProductListPage = () => {
+  const { canModify, canCreateOrDelete } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
@@ -169,9 +171,11 @@ export const ProductListPage = () => {
           </p>
         </div>
 
-        <Button variant="accent" onClick={handleOpenCreateModal}>
-          Nouveau Produit
-        </Button>
+        {canCreateOrDelete && (
+          <Button variant="accent" onClick={handleOpenCreateModal}>
+            Nouveau Produit
+          </Button>
+        )}
       </div>
 
       {/* Messages d'alerte / succès */}
@@ -396,24 +400,31 @@ export const ProductListPage = () => {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell align="center">
-                    <div style={{ display: 'inline-flex', gap: '8px' }}>
-                      <Button
-                        variant="outline"
-                        style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                        onClick={() => handleOpenEditModal(product)}
-                      >
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="danger"
-                        style={{ padding: '4px 10px', fontSize: '0.8rem' }}
-                        onClick={() => handleDelete(product.id, product.name)}
-                      >
-                        Supprimer
-                      </Button>
-                    </div>
-                  </TableCell>
+                   <TableCell align="center">
+                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        {canModify && (
+                          <Button
+                            variant="outline"
+                            style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+                            onClick={() => handleOpenEditModal(product)}
+                          >
+                            Modifier
+                          </Button>
+                        )}
+                        {canCreateOrDelete && (
+                          <Button
+                            variant="danger"
+                            style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+                            onClick={() => handleDelete(product.id, product.name)}
+                          >
+                            Supprimer
+                          </Button>
+                        )}
+                        {!canModify && !canCreateOrDelete && (
+                          <span style={{ color: '#94A3B8', fontSize: '0.8rem' }}>Lecture seule</span>
+                        )}
+                      </div>
+                    </TableCell>
                 </TableRow>
               );
             })}
