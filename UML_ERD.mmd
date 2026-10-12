@@ -1,0 +1,31 @@
+%% ER Diagram (Merise-style) for Stock Management Application
+
+mermaid
+erDiagram
+    PRODUCT ||--|{ CATEGORY : belongs_to
+    PRODUCT ||--|{ STOCK_MOVEMENT : has_movements
+
+    PRODUCT {
+        number id PK
+        string name
+        string description
+        number price
+        number quantity
+        number categoryId FK
+        datetime createdAt
+    }
+
+    CATEGORY {
+        number id PK
+        string name
+        string description
+        datetime createdAt
+    }
+
+    STOCK_MOVEMENT {
+        number id PK
+        number productId FK
+        string type "IN/OUT"
+        number quantity
+        datetime date
+    }
