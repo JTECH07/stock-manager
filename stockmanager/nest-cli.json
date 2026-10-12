@@ -1,0 +1,7 @@
+{
+  "collection": "@nestjs/schematics",
+  "root": "stockmanager",
+  "sourceRoot": "stockmanager/src",
+  "prefix": "app",
+  "jsons": []
+}
