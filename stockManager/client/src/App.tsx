@@ -1,26 +1,79 @@
-import { useEffect } from 'react';
-import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { LoginPage } from './features/auth/login.page';
 import { ProductListPage } from './features/products/product-list.page';
 import { CategoryListPage } from './features/categories/category-list.page';
 import { StockMovementPage } from './features/stock-movements/stock-movement.page';
 import { AlertsPage } from './features/alerts/alerts.page';
+import { UsersManagementPage } from './features/users/users-management.page';
 
 function App() {
-  useEffect(() => {
-    console.log('App initialized - connecting to API at http://localhost:3000');
-  }, []);
-
   return (
     <Router>
-      <Layout>
+      <AuthProvider>
         <Routes>
-          <Route path="/" element={<ProductListPage />} />
-          <Route path="/categories" element={<CategoryListPage />} />
-          <Route path="/stock" element={<StockMovementPage />} />
-          <Route path="/alerts" element={<AlertsPage />} />
+          {/* Page de connexion : accessible sans authentification */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Toutes les pages protégées passent par le Layout */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProductListPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CategoryListPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stock"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <StockMovementPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alerts"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AlertsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          {/* Route ADMIN uniquement */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute requireRole="ADMIN">
+                <Layout>
+                  <UsersManagementPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback : redirige vers l'accueil */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Layout>
+      </AuthProvider>
     </Router>
   );
 }
