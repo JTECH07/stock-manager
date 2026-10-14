@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireRole?: 'ADMIN' | 'MANAGER' | 'USER';
+  requireRole?: 'ADMIN' | 'MANAGER' | 'MAGASINIER';
 }
 
 export const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
@@ -33,9 +33,9 @@ export const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) =
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Hiérarchie des rôles : ADMIN > MANAGER > USER
+  // Hiérarchie des rôles : ADMIN > MANAGER > MAGASINIER
   if (requireRole) {
-    const hierarchy = { ADMIN: 3, MANAGER: 2, USER: 1 };
+    const hierarchy = { ADMIN: 3, MANAGER: 2, MAGASINIER: 1 };
     const userLevel = hierarchy[user?.role as keyof typeof hierarchy] ?? 0;
     const requiredLevel = hierarchy[requireRole];
 
