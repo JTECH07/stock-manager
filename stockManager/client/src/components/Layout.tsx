@@ -2,9 +2,9 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
-  ADMIN:   { bg: '#F77F00', color: '#FFFFFF' },
+  ADMIN: { bg: '#F77F00', color: '#FFFFFF' },
   MANAGER: { bg: '#2B2D42', color: '#FFFFFF' },
-  USER:    { bg: '#E2E8F0', color: '#2B2D42' },
+  MAGASINIER: { bg: '#E2E8F0', color: '#2B2D42' },
 };
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -26,7 +26,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     navigate('/login', { replace: true });
   };
 
-  const roleStyle = user?.role ? ROLE_COLORS[user.role] ?? ROLE_COLORS['USER'] : ROLE_COLORS['USER'];
+  const roleStyle = user?.role
+    ? ROLE_COLORS[user.role] ?? ROLE_COLORS['MAGASINIER']
+    : ROLE_COLORS['MAGASINIER'];
 
   return (
     <div
@@ -44,17 +46,19 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           position: 'sticky',
           top: 0,
           zIndex: 100,
+          padding: '16px 0',
         }}
       >
         <div
           style={{
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: '12px 24px',
+            padding: '0 24px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: '16px',
+            flexWrap: 'wrap',
           }}
         >
           {/* Logo */}
@@ -71,8 +75,31 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             </span>
           </div>
 
+          {/* Bouton menu hamburger mobile */}
+          <button
+            id="menuToggle"
+            style={{
+              display: 'none',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#FFFFFF',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '8px',
+            }}
+          >
+            ☰
+          </button>
+
           {/* Navigation */}
-          <nav style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          <nav
+            id="mainNav"
+            style={{
+              display: 'flex',
+              gap: '4px',
+              flexWrap: 'wrap',
+            }}
+          >
             {navLinks.map((link) => {
               const isActive =
                 link.to === '/'
@@ -135,31 +162,33 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 {user.name || user.email}
               </span>
 
-              {/* Bouton Déconnexion */}
-              <button
-                onClick={handleLogout}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid #64748B',
-                  color: '#CBD5E1',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#F77F00';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#F77F00';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#64748B';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#CBD5E1';
-                }}
-              >
-                Déconnexion
-              </button>
+              {window.innerWidth > 768 && (
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid #64748B',
+                    color: '#CBD5E1',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    marginLeft: '16px',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = '#F77F00';
+                    (e.currentTarget as HTMLButtonElement).style.color = '#F77F00';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = '#64748B';
+                    (e.currentTarget as HTMLButtonElement).style.color = '#CBD5E1';
+                  }}
+                >
+                  Déconnexion
+                </button>
+              )}
             </div>
           ) : null}
         </div>
@@ -187,7 +216,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           color: '#64748B',
         }}
       >
-        StockManager — React &amp; NestJS — Base de données SQLite TypeORM
+        &copy;StockManager | React &amp; NestJS - Base de données SQLite TypeORM<br/>Powered by $JAMS
       </footer>
     </div>
   );
