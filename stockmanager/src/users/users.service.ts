@@ -29,7 +29,7 @@ export class UsersService {
       ...createUserDto,
       email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
-      role: createUserDto.role || UserRole.USER,
+      role: createUserDto.role || UserRole.MAGASINIER,
     });
 
     return this.userRepository.save(user);
@@ -70,4 +70,3 @@ export class UsersService {
     return { success: true, id };
   }
 }
-
