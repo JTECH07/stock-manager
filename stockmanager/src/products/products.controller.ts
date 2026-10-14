@@ -28,11 +28,13 @@ export class ProductsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('categoryId') categoryId?: string,
+    @Query('search') search?: string,
   ) {
     return this.productsService.findAll(
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 10,
       categoryId ? parseInt(categoryId, 10) : undefined,
+      search,
     );
   }
 
