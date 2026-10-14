@@ -1,76 +1,102 @@
-%% Class Diagram for Stock Management Application
-
-mermaid
+%% Diagramme de classes - StockManager
 classDiagram
-    class Product {
+    direction LR
+
+    class User {
         +number id
+        +string email
         +string name
-        +string description
-        +number price
-        +number quantity
-        +number? categoryId
+        +string password
+        +UserRole role
         +Date createdAt
-        +getQuantity(): number
-        +setQuantity(q: number): void
-        +isLowStock(threshold: number): boolean
+    }
+
+    class UserRole {
+        <<enumeration>>
+        ADMIN
+        MANAGER
+        MAGASINIER
     }
 
     class Category {
         +number id
         +string name
-        +string description
+        +string? description
         +Date createdAt
-        +getName(): string
-        +setName(n: string): void
+        +Product[] products
+    }
+
+    class Product {
+        +number id
+        +string name
+        +string? description
+        +number price
+        +number quantity
+        +number? categoryId
+        +Category? category
+        +StockMovement[] movements
+        +Date createdAt
     }
 
     class StockMovement {
         +number id
         +number productId
-        +string type { 'IN', 'OUT' }
+        +string type
         +number quantity
         +Date date
-        +getTypeLabel(): string
-        +getQuantityClass(): string
+        +Product? product
     }
 
     class Alert {
+        <<DTO>>
         +number productId
         +string productName
         +number currentQuantity
+        +number threshold
+        +string categoryName
         +string message
-        +Date generatedAt
     }
 
-    class ProductService {
-        +findAll(page: number, limit: number): Product[]
-        +findOne(id: number): Product
-        +create(dto: CreateProductDto): Product
-        +update(id: number, dto: UpdateProductDto): Product
-        +remove(id: number): Product
+    class AuthService {
+        +validateUser(email, pass) User
+        +login(dto) AuthResponse
+        +register(dto) AuthResponse
     }
 
-    class CategoryService {
-        +findAll(page: number, limit: number): Category[]
-        +findOne(id: number): Category
-        +create(dto: CreateCategoryDto): Category
-        +update(id: number, dto: UpdateCategoryDto): Category
-        +remove(id: number): Category
+    class ProductsService {
+        +findAll(page, limit, categoryId) PaginatedProducts
+        +findOne(id) Product
+        +create(dto) Product
+        +update(id, dto) Product
+        +remove(id) Result
     }
 
-    class StockMovementService {
-        +create(dto: CreateStockMovementDto): StockMovement
-        +findAll(productId?: number): StockMovement[]
+    class CategoriesService {
+        +findAll(page, limit) PaginatedCategories
+        +findOne(id) Category
+        +create(dto) Category
+        +update(id, dto) Category
+        +remove(id) Result
+    }
+
+    class StockMovementsService {
+        +create(dto) StockMovement
+        +findAll(productId) StockMovement[]
     }
 
     class AlertsService {
-        +checkAlerts(productId?: number): Alert[]
-        +getLowStockItems(threshold: number): Alert[]
+        +checkAlerts(productId) Alert[]
+        +getLowStockItems(threshold, productId) Alert[]
     }
 
-    Product "1" --> "*" StockMovement
-    Category "1" --> "*" Product
-    ProductService ..> Product
-    CategoryService ..> Category
-    StockMovementService ..> Product
+    User --> UserRole : role
+    Category "0..1" <-- "0..*" Product : category
+    Product "1" <-- "0..*" StockMovement : product
+
+    AuthService ..> User
+    ProductsService ..> Product
+    CategoriesService ..> Category
+    StockMovementsService ..> Product
+    StockMovementsService ..> StockMovement
     AlertsService ..> Product
+    AlertsService ..> Alert
