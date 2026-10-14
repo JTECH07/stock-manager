@@ -1,4 +1,5 @@
 export const API_BASE = 'http://localhost:3000';
+const REQUEST_TIMEOUT_MS = 8000;
 
 export interface ProductPayload {
   name: string;
@@ -23,7 +24,7 @@ export interface UserPayload {
   id: number;
   email: string;
   name: string;
-  role: 'ADMIN' | 'MANAGER' | 'USER';
+  role: 'ADMIN' | 'MANAGER' | 'MAGASINIER';
 }
 
 const getAuthHeaders = (): Record<string, string> => {
@@ -50,68 +51,88 @@ const handleResponse = async (res: Response) => {
   return res.json();
 };
 
+const apiFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: init?.signal ?? controller.signal,
+    });
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      throw new Error("Le serveur API ne répond pas. Vérifiez que le backend NestJS tourne sur le port 3000.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
+
 export const api = {
   auth: {
     login: (email: string, password: string) =>
-      fetch(`${API_BASE}/auth/login`, {
+      apiFetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       }).then(handleResponse),
     register: (data: { email: string; name: string; password: string; role?: string }) =>
-      fetch(`${API_BASE}/auth/register`, {
+      apiFetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       }).then(handleResponse),
     getProfile: () =>
-      fetch(`${API_BASE}/auth/profile`, {
+      apiFetch(`${API_BASE}/auth/profile`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
   },
 
   users: {
     list: () =>
-      fetch(`${API_BASE}/users`, {
+      apiFetch(`${API_BASE}/users`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
     updateRole: (id: number, role: string) =>
-      fetch(`${API_BASE}/users/${id}/role`, {
+      apiFetch(`${API_BASE}/users/${id}/role`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ role }),
       }).then(handleResponse),
     remove: (id: number) =>
-      fetch(`${API_BASE}/users/${id}`, {
+      apiFetch(`${API_BASE}/users/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       }).then(handleResponse),
   },
 
   products: {
-    list: (page = 1, limit = 10, categoryId?: number) => {
+    list: (page = 1, limit = 10, categoryId?: number, search?: string) => {
       const url = new URL(`${API_BASE}/products`);
       url.searchParams.set('page', String(page));
       url.searchParams.set('limit', String(limit));
       if (categoryId) url.searchParams.set('categoryId', String(categoryId));
-      return fetch(url.toString(), { headers: getAuthHeaders() }).then(handleResponse);
+      if (search?.trim()) url.searchParams.set('search', search.trim());
+      return apiFetch(url.toString(), { headers: getAuthHeaders() }).then(handleResponse);
     },
     get: (id: number) =>
-      fetch(`${API_BASE}/products/${id}`, { headers: getAuthHeaders() }).then(handleResponse),
+      apiFetch(`${API_BASE}/products/${id}`, { headers: getAuthHeaders() }).then(handleResponse),
     create: (product: ProductPayload) =>
-      fetch(`${API_BASE}/products`, {
+      apiFetch(`${API_BASE}/products`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(product),
       }).then(handleResponse),
     update: (id: number, product: Partial<ProductPayload>) =>
-      fetch(`${API_BASE}/products/${id}`, {
+      apiFetch(`${API_BASE}/products/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(product),
       }).then(handleResponse),
     remove: (id: number) =>
-      fetch(`${API_BASE}/products/${id}`, {
+      apiFetch(`${API_BASE}/products/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       }).then(handleResponse),
@@ -119,25 +140,25 @@ export const api = {
 
   categories: {
     list: (page = 1, limit = 50) =>
-      fetch(`${API_BASE}/categories?page=${page}&limit=${limit}`, {
+      apiFetch(`${API_BASE}/categories?page=${page}&limit=${limit}`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
     get: (id: number) =>
-      fetch(`${API_BASE}/categories/${id}`, { headers: getAuthHeaders() }).then(handleResponse),
+      apiFetch(`${API_BASE}/categories/${id}`, { headers: getAuthHeaders() }).then(handleResponse),
     create: (category: CategoryPayload) =>
-      fetch(`${API_BASE}/categories`, {
+      apiFetch(`${API_BASE}/categories`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(category),
       }).then(handleResponse),
     update: (id: number, category: Partial<CategoryPayload>) =>
-      fetch(`${API_BASE}/categories/${id}`, {
+      apiFetch(`${API_BASE}/categories/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(category),
       }).then(handleResponse),
     remove: (id: number) =>
-      fetch(`${API_BASE}/categories/${id}`, {
+      apiFetch(`${API_BASE}/categories/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       }).then(handleResponse),
@@ -145,11 +166,11 @@ export const api = {
 
   stockMovements: {
     list: (productId?: number) =>
-      fetch(`${API_BASE}/stock-movements${productId ? `?productId=${productId}` : ''}`, {
+      apiFetch(`${API_BASE}/stock-movements${productId ? `?productId=${productId}` : ''}`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
     create: (movement: StockMovementPayload) =>
-      fetch(`${API_BASE}/stock-movements`, {
+      apiFetch(`${API_BASE}/stock-movements`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(movement),
@@ -158,11 +179,11 @@ export const api = {
 
   alerts: {
     check: (productId?: number) =>
-      fetch(`${API_BASE}/alerts${productId ? `?productId=${productId}` : ''}`, {
+      apiFetch(`${API_BASE}/alerts${productId ? `?productId=${productId}` : ''}`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
     lowStock: (threshold = 5) =>
-      fetch(`${API_BASE}/alerts/low-stock?threshold=${threshold}`, {
+      apiFetch(`${API_BASE}/alerts/low-stock?threshold=${threshold}`, {
         headers: getAuthHeaders(),
       }).then(handleResponse),
   },
