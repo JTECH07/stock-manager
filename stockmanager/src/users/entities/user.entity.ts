@@ -3,7 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeor
 export enum UserRole {
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
-  USER = 'USER',
+  MAGASINIER = 'MAGASINIER',
 }
 
 @Entity('users')
@@ -23,11 +23,10 @@ export class User {
   @Column({
     type: 'varchar',
     length: 20,
-    default: UserRole.USER,
+    default: UserRole.MAGASINIER,
   })
   role: UserRole;
 
   @CreateDateColumn()
   createdAt: Date;
 }
-
