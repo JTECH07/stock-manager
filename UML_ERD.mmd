@@ -1,11 +1,22 @@
-%% ER Diagram (Merise-style) for Stock Management Application
-
-mermaid
+%% Diagramme entite-association - StockManager
 erDiagram
-    PRODUCT ||--|{ CATEGORY : belongs_to
-    PRODUCT ||--|{ STOCK_MOVEMENT : has_movements
+    USERS {
+        number id PK
+        string email UK
+        string name
+        string password
+        string role
+        datetime createdAt
+    }
 
-    PRODUCT {
+    CATEGORIES {
+        number id PK
+        string name
+        string description
+        datetime createdAt
+    }
+
+    PRODUCTS {
         number id PK
         string name
         string description
@@ -15,17 +26,13 @@ erDiagram
         datetime createdAt
     }
 
-    CATEGORY {
-        number id PK
-        string name
-        string description
-        datetime createdAt
-    }
-
-    STOCK_MOVEMENT {
+    STOCK_MOVEMENTS {
         number id PK
         number productId FK
-        string type "IN/OUT"
+        string type
         number quantity
         datetime date
     }
+
+    CATEGORIES ||--o{ PRODUCTS : "classe"
+    PRODUCTS ||--o{ STOCK_MOVEMENTS : "historise"
