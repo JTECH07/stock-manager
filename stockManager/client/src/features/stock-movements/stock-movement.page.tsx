@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { api, StockMovementPayload } from '../../api';
 import { Button } from '../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '../../components/Table';
 
 export const StockMovementPage = () => {
+  const { canManageStockMovements } = useAuth();
   const [movements, setMovements] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<number | undefined>(undefined);
@@ -122,12 +124,16 @@ export const StockMovementPage = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button variant="accent" onClick={() => handleOpenModal('IN')}>
-            Enregistrer une Entrée (IN)
-          </Button>
-          <Button variant="primary" onClick={() => handleOpenModal('OUT')}>
-            Enregistrer une Sortie (OUT)
-          </Button>
+          {canManageStockMovements && (
+            <>
+              <Button variant="accent" onClick={() => handleOpenModal('IN')}>
+                Enregistrer une Entrée (IN)
+              </Button>
+              <Button variant="primary" onClick={() => handleOpenModal('OUT')}>
+                Enregistrer une Sortie (OUT)
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
