@@ -7,8 +7,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isManager: boolean;
+  isMagasinier: boolean;
   canModify: boolean; // ADMIN ou MANAGER
   canCreateOrDelete: boolean; // ADMIN
+  canManageStockMovements: boolean; // ADMIN, MANAGER ou MAGASINIER
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -16,11 +18,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const readStoredUser = (): UserPayload | null => {
+  const saved = localStorage.getItem('stockmanager_user');
+  if (!saved) return null;
+
+  try {
+    return JSON.parse(saved);
+  } catch {
+    localStorage.removeItem('stockmanager_user');
+    localStorage.removeItem('stockmanager_token');
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserPayload | null>(() => {
-    const saved = localStorage.getItem('stockmanager_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState<UserPayload | null>(() => readStoredUser());
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem('stockmanager_token');
   });
@@ -66,8 +78,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isAdmin = user?.role === 'ADMIN';
   const isManager = user?.role === 'MANAGER';
+  const isMagasinier = user?.role === 'MAGASINIER';
   const canModify = isAdmin || isManager;
   const canCreateOrDelete = isAdmin;
+  const canManageStockMovements = isAdmin || isManager || isMagasinier;
 
   return (
     <AuthContext.Provider
@@ -77,8 +91,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isAuthenticated: !!token && !!user,
         isAdmin,
         isManager,
+        isMagasinier,
         canModify,
         canCreateOrDelete,
+        canManageStockMovements,
         login,
         logout,
         loading,
@@ -96,4 +112,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
