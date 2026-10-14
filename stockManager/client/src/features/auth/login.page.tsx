@@ -160,7 +160,7 @@ export const LoginPage = () => {
         </form>
 
         {/* Comptes de test rapides */}
-        <div
+        {/* <div
           style={{
             marginTop: '28px',
             paddingTop: '20px',
@@ -203,15 +203,14 @@ export const LoginPage = () => {
             <Button
               variant="outline"
               style={{ padding: '6px 10px', fontSize: '0.8rem', justifyContent: 'space-between' }}
-              onClick={() => handleQuickLogin('user@stockmanager.com', 'user123')}
+              onClick={() => handleQuickLogin('magasinier@stockmanager.com', 'magasinier123')}
             >
-              <span>USER : user@stockmanager.com</span>
+              <span>MAGASINIER : magasinier@stockmanager.com</span>
               <span style={{ fontWeight: 700, color: '#2B2D42' }}>Opérateur (IN/OUT)</span>
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
 };
-
