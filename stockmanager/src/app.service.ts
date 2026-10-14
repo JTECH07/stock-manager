@@ -26,10 +26,30 @@ export class AppService implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ role: UserRole.MAGASINIER })
+      .where('role = :legacyRole', { legacyRole: 'USER' })
+      .execute();
+
+    const legacyUser = await this.userRepository.findOne({
+      where: { email: 'user@stockmanager.com' },
+    });
+    const magasinierUser = await this.userRepository.findOne({
+      where: { email: 'magasinier@stockmanager.com' },
+    });
+    if (legacyUser && !magasinierUser) {
+      legacyUser.email = 'magasinier@stockmanager.com';
+      legacyUser.name = 'Magasinier Principal';
+      legacyUser.role = UserRole.MAGASINIER;
+      await this.userRepository.save(legacyUser);
+    }
+
     // 1. Initialisation des utilisateurs de test
     const usersCount = await this.userRepository.count();
     if (usersCount === 0) {
-      console.log('Seeding initial users (admin, manager, user)...');
+      console.log('Seeding initial users (admin, manager, magasinier)...');
 
       await this.usersService.create({
         email: 'admin@stockmanager.com',
@@ -46,13 +66,13 @@ export class AppService implements OnApplicationBootstrap {
       });
 
       await this.usersService.create({
-        email: 'user@stockmanager.com',
-        name: 'Opérateur Magasin',
-        password: 'user123',
-        role: UserRole.USER,
+        email: 'magasinier@stockmanager.com',
+        name: 'Magasinier Principal',
+        password: 'magasinier123',
+        role: UserRole.MAGASINIER,
       });
 
-      console.log('Users seeded: admin, manager, user created!');
+      console.log('Users seeded: admin, manager, magasinier created!');
     }
 
     // 2. Initialisation des catégories et produits
