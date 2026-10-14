@@ -17,7 +17,7 @@ export const UsersManagementPage = () => {
     name: '',
     email: '',
     password: '',
-    role: 'USER',
+    role: 'MAGASINIER',
   });
 
   const loadUsers = () => {
@@ -76,16 +76,33 @@ export const UsersManagementPage = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newUserForm.name.trim()) {
+      setError('Le nom complet est requis');
+      return;
+    }
+    if (!newUserForm.email.trim() || !newUserForm.email.includes('@')) {
+      setError('Veuillez entrer une adresse email valide');
+      return;
+    }
+    if (!newUserForm.password || newUserForm.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
     try {
       await api.auth.register(newUserForm);
       setSuccess(`Utilisateur "${newUserForm.name}" créé avec succès`);
       setIsModalOpen(false);
-      setNewUserForm({ name: '', email: '', password: '', role: 'USER' });
+      setNewUserForm({ name: '', email: '', password: '', role: 'MAGASINIER' });
       loadUsers();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       console.error('Erreur création:', err);
-      setError(err.message || 'Erreur lors de la création');
+      const errorMessage = err.message || 'Erreur lors de la création';
+      if (errorMessage.includes('already exists') || errorMessage.includes('Duplicate')) {
+        setError('Cette adresse email est déjà utilisée');
+      } else {
+        setError(errorMessage);
+      }
       setTimeout(() => setError(null), 4000);
     }
   };
@@ -107,7 +124,7 @@ export const UsersManagementPage = () => {
             Gestion des Utilisateurs & Permissions
           </h1>
           <p style={{ color: '#64748B', fontSize: '0.9rem', marginTop: '4px' }}>
-            Administration des comptes d'accès, affectation des rôles (ADMIN, MANAGER, USER)
+            Administration des comptes d'accès, affectation des rôles (ADMIN, MANAGER, MAGASINIER)
           </p>
         </div>
 
@@ -191,7 +208,7 @@ export const UsersManagementPage = () => {
                         cursor: isSelf ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      <option value="USER">USER (Opérateur)</option>
+                      <option value="MAGASINIER">MAGASINIER (Entrées/Sorties)</option>
                       <option value="MANAGER">MANAGER (Responsable)</option>
                       <option value="ADMIN">ADMIN (Plein accès)</option>
                     </select>
@@ -327,7 +344,7 @@ export const UsersManagementPage = () => {
                     backgroundColor: '#F8F9FA',
                   }}
                 >
-                  <option value="USER">USER (Opérateur)</option>
+                  <option value="MAGASINIER">MAGASINIER (Entrées/Sorties)</option>
                   <option value="MANAGER">MANAGER (Responsable)</option>
                   <option value="ADMIN">ADMIN (Administrateur)</option>
                 </select>
@@ -348,4 +365,3 @@ export const UsersManagementPage = () => {
     </div>
   );
 };
-
