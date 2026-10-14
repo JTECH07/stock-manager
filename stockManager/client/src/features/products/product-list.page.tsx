@@ -9,6 +9,7 @@ export const ProductListPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
@@ -39,7 +40,7 @@ export const ProductListPage = () => {
 
   const loadProducts = () => {
     setLoading(true);
-    api.products.list(page, limit, selectedCategory)
+    api.products.list(page, limit, selectedCategory, search)
       .then((data) => {
         if (data && Array.isArray(data.data)) {
           setProducts(data.data);
@@ -65,7 +66,7 @@ export const ProductListPage = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [page, limit, selectedCategory]);
+  }, [page, limit, selectedCategory, search]);
 
   const handleOpenCreateModal = () => {
     setEditingProduct(null);
@@ -234,6 +235,28 @@ export const ProductListPage = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Recherche par nom de produit */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="Rechercher un produit..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                backgroundColor: '#F8F9FA',
+                width: '300px',
+                fontSize: '0.875rem',
+                color: '#2B2D42',
+              }}
+            />
+          </div>
+
           <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2B2D42' }}>
             Filtrer par catégorie :
           </label>
@@ -353,7 +376,7 @@ export const ProductListPage = () => {
                     )}
                   </TableCell>
                   <TableCell align="right" style={{ fontWeight: 600 }}>
-                    {Number(product.price).toFixed(2)} €
+                    {Number(product.price).toLocaleString("fr-CF", {style: "currency", currency: "XOF"})}
                   </TableCell>
                   <TableCell align="center" style={{ fontWeight: 700 }}>
                     {product.quantity}
@@ -494,7 +517,7 @@ export const ProductListPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#2B2D42', marginBottom: '6px' }}>
-                    Prix (€)
+                    Prix (FCFA)
                   </label>
                   <input
                     type="number"
